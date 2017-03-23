@@ -1,0 +1,561 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass ctex-article
+\begin_preamble
+% 如果没有这一句命令，XeTeX会出错，原因参见
+% http://bbs.ctex.org/viewthread.php?tid=60547
+\DeclareRobustCommand\nobreakspace{\leavevmode\nobreak\ }
+\end_preamble
+\options UTF8
+\use_default_options true
+\maintain_unincluded_children false
+\language chinese-simplified
+\language_package none
+\inputencoding utf8-plain
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format pdf4
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 0
+\use_package mhchem 1
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Kernel Canonical Correlation Analysis
+\end_layout
+
+\begin_layout Author
+bxf_hit@163.com
+\end_layout
+
+\begin_layout Author
+2017.03.24
+\end_layout
+
+\begin_layout Abstract
+本文是对近几日所读的几篇关于KCCA的文献所做的总结，算是之前CCA一文的续篇。
+\end_layout
+
+\begin_layout Section
+KCCA原理
+\end_layout
+
+\begin_layout Standard
+之前CCA一文中已经说到，KCCA的提出是为了解决CCA的非线性相关问题；
+\end_layout
+
+\begin_layout Standard
+KCCA的主要思想就是利用核函数将原来的低维向量升维到高维空间，这样原来在低维的非线性相关属性到高维就会变成线性相关；这点的思想与SVM的核函数f:
+\begin_inset Formula $R^{n}\rightarrow R^{N}(n<N)$
+\end_inset
+
+相似，使用核函数的目的就是将低维向量升到高维空间，使原来的线性不可分问题变成线性可分问题。我们将这里用到的核函数抽象为：
+\begin_inset Formula 
+\begin{equation}
+\varPhi:X=(X_{1}X_{2}\cdots X_{n})\rightarrow\varPhi(X)=(\phi_{1}(X),\phi_{2}(X)\cdots\phi_{N}(X))\text{ 其中n<N}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+KCCA求解
+\end_layout
+
+\begin_layout Standard
+类似于CCA,我们的目的也是构造高维空间投影向量
+\begin_inset Formula $c,d\in R^{N}$
+\end_inset
+
+ ,使
+\begin_inset Formula $X'=c^{T}X,Y'=d^{T}Y$
+\end_inset
+
+间的相关系数最大。然而这样直接去求有如下问题：
+\end_layout
+
+\begin_layout Itemize
+核函数如高斯径向基核函数会将向量升到无穷维，此时c,d自然也是无穷的，自然无法求解
+\end_layout
+
+\begin_layout Itemize
+引入核函数的一个目的就是利用核函数的核矩阵K,也就是期望出现
+\begin_inset Formula $X^{T}X$
+\end_inset
+
+型，替换成核矩阵K，而上面的做法显然没有
+\begin_inset Formula $X^{T}X$
+\end_inset
+
+型，因此很难利用核矩阵，求解比较复杂
+\end_layout
+
+\begin_layout Standard
+重新定义： 
+\begin_inset Formula $P=\left[\begin{array}{c}
+\varPhi(X1)^{T}\\
+\varPhi(X2)^{T}\\
+\vdots\\
+\varPhi(Xm)^{T}
+\end{array}\right]$
+\end_inset
+
+ 则
+\begin_inset Formula $P^{T}=\left[\begin{array}{cccc}
+\varPhi(X1) & \varPhi(X2) & \cdots & \varPhi(Xm)\end{array}\right]$
+\end_inset
+
+,同理 
+\begin_inset Formula $Q=\left[\begin{array}{c}
+\varPhi(Y1)^{T}\\
+\varPhi(Y2)^{T}\\
+\vdots\\
+\varPhi(Ym)^{T}
+\end{array}\right]$
+\end_inset
+
+(这里X,Y的样本数量是相同的)
+\end_layout
+
+\begin_layout Standard
+令c = P
+\begin_inset Formula $^{T}$
+\end_inset
+
+a, d = Q
+\begin_inset Formula $^{T}$
+\end_inset
+
+b, 这里a相当于通过控制每个高维向量的权重控制c.（这里用到了KPCA的相关证明，空间中的任一向量（哪怕是基向量），都可以由该空间中的所有样本线性表示）
+\end_layout
+
+\begin_layout Standard
+与之对应的：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+X'=c^{T}P,Y'=d^{T}Q
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+类似于CCA,我们要最大化的还是：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\rho(X',Y')=\frac{cov(X',Y')}{\sqrt{Var(X')}\sqrt{Var(Y')}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其中：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Var(X')=c^{T}var(P)c=a^{T}Pvar(P)P^{T}a
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Var(Y')=d^{T}var(Q)d=b^{T}Qvar(Q)Q^{T}b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Cov(X',Y')=c^{T}cov(P,Q)d=a^{T}Pcov(P,Q)Q^{T}b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+进行下一步前，先对P,Q进行归零化处理,即
+\begin_inset Formula $\sum$
+\end_inset
+
+xi=0，好处就是
+\begin_inset Formula $cov(P,Q)=\frac{1}{N-1}P^{T}Q$
+\end_inset
+
+,（这个待证明）。
+\end_layout
+
+\begin_layout Standard
+引入核矩阵K,K
+\begin_inset Formula $_{p}$
+\end_inset
+
+ = 
+\begin_inset Formula $PP^{T}$
+\end_inset
+
+,K
+\begin_inset Formula $_{q}$
+\end_inset
+
+ =
+\begin_inset Formula $QQ^{T}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+于是上面的公式也可以写成：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Var(X')=a^{T}Pvar(P)P^{T}a=a^{T}PP^{T}PP^{T}a=a^{T}K_{p}^{2}a
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Var(Y')=b^{T}Qvar(Q)Q^{T}b=b^{T}QQ^{T}QQ^{T}b=b^{T}K_{q}^{2}b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Cov(X',Y')=a^{T}Pcov(P,Q)Q^{T}b=a^{T}PP^{T}QQ^{T}b=a^{T}K_{p}K_{q}b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+因此
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\rho(X',Y')=\frac{cov(X',Y')}{\sqrt{Var(X')}\sqrt{Var(Y')}}=\frac{a^{T}K_{p}K_{q}b}{\sqrt{a^{T}K_{p}^{2}a}\sqrt{b^{T}K_{q}^{2}b}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+与CCA类似，此时的优化问题变成：
+\end_layout
+
+\begin_layout Standard
+Maximize: 
+\begin_inset Formula $a^{T}K_{p}K_{q}b$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subject to: 
+\begin_inset Formula $a^{T}K_{p}^{2}a=1,b^{T}K_{q}^{2}b=1$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+构造 Lagrangian 等式:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+L=a^{T}K_{p}K_{q}b-\frac{\lambda}{2}(a^{T}K_{p}^{2}a-1)-\frac{\theta}{2}(b^{T}K_{q}^{2}b-1)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+类似于CCA的求解过程，最后也可以得到一个求矩阵特征值的方程：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+K_{p}K_{p}a-\lambda^{2}K_{p}K_{p}a=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+即：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Ia=\lambda^{2}a
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+得
+\begin_inset Formula $\lambda_{1}=\lambda_{2}=\cdots=\lambda_{k}=1$
+\end_inset
+
+,发现所有的
+\begin_inset Formula $\text{\lambda}$
+\end_inset
+
+都是相等的，显然模型是过拟合的：）,需要正则化处理。
+\end_layout
+
+\begin_layout Section
+正则化的KCCA
+\end_layout
+
+\begin_layout Standard
+有两种常见的正则化的方法，一种是对Lagrange加入正则项，一种是对限制条件做一下修改。
+\end_layout
+
+\begin_layout Standard
+第一种是引入正则项的Lagrange函数为：
+\begin_inset Formula 
+\begin{equation}
+L=a^{T}K_{p}K_{q}b-\frac{\lambda}{2}(a^{T}K_{p}^{2}a-1)-\frac{\theta}{2}(b^{T}K_{q}^{2}b-1)+\frac{\eta}{2}(\parallel a\parallel^{2}+\parallel b\parallel^{2})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+同样令Lagrange函数的导数为0，得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+K_{p}K_{q}b=(\lambda K_{p}^{2}+\eta I)a
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+K_{q}K_{p}a=(\theta K_{q}^{2}+\eta I)b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+最后化简可以求得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+(K_{p}+\eta I)^{-1}K_{q}(K_{q}+\eta I)^{-1}K_{q}a=λ^{2}a
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+又回到了求特征值和特征向量的问题了，已经解决。
+\end_layout
+
+\begin_layout Standard
+第二种是对限制条件作修改，修改后的模型为：
+\end_layout
+
+\begin_layout Standard
+Maximize: 
+\begin_inset Formula $a^{T}K_{p}K_{q}b$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subject to: 
+\begin_inset Formula $\begin{array}{c}
+(1-\sigma)a^{T}K_{p}^{2}a+\sigma a^{T}K_{p}a=1\\
+(1-\sigma)b^{T}K_{q}^{2}b+\sigma b^{T}K_{q}b=1
+\end{array}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+继续构造Lagrange函数，最后也可以化简为与方案1类似的结果，这里就不详细推导了。
+\end_layout
+
+\begin_layout Section
+小结
+\end_layout
+
+\begin_layout Standard
+KCCA通过使用核函数升维的思想是原来低维空间内非线性相关的两组属性到高维空间内能够相性相关，从而捕获了一些非线性相关的信息，相对于CCA是个很不错的提升。KC
+CA的实现还有一些细节没有说明，如怎样Centering 高维空间的数据，矩阵的分解等，有时间会继续补充。
+\end_layout
+
+\begin_layout Standard
+KCCA的提出有一定程度是借鉴了KPCA的做法，因此时间允许的条件下我会考虑去阅读下KPCA相关的论文。
+\end_layout
+
+\begin_layout Section
+参考文献
+\end_layout
+
+\begin_layout Enumerate
+Canonical Correlation Analysis: An Overview with Application to Learning
+ Methods.
+ David R.
+ Hardoon Sandor Szedmak 
+\end_layout
+
+\begin_layout Enumerate
+A kernel method for canonical correlation analysis.
+ Shotaro Akaho
+\end_layout
+
+\begin_layout Enumerate
+Kernel Independent Component Analysis.
+ Francis R.
+ Bach,Michael I.
+ Jordan
+\end_layout
+
+\begin_layout Enumerate
+Kernel Principal Component Analysis.
+ Bernhard Scholkopf , Alexander Smola
+\end_layout
+
+\begin_layout Enumerate
+http://www.cnblogs.com/boostable/p/lec_kernel_canonical_correlation_analysis.html
+\end_layout
+
+\begin_layout Enumerate
+http://www.cnblogs.com/jerrylead/archive/2011/06/20/2085491.html
+\end_layout
+
+\end_body
+\end_document
