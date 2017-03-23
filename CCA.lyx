@@ -1,0 +1,813 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass ctex-article
+\begin_preamble
+% 如果没有这一句命令，XeTeX会出错，原因参见
+% http://bbs.ctex.org/viewthread.php?tid=60547
+\DeclareRobustCommand\nobreakspace{\leavevmode\nobreak\ }
+\end_preamble
+\options UTF8
+\use_default_options true
+\maintain_unincluded_children false
+\language chinese-simplified
+\language_package none
+\inputencoding utf8-plain
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format pdf4
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 0
+\use_package mhchem 1
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Canonical Correlation Analysis 典型关联分析
+\end_layout
+
+\begin_layout Author
+2017.03.22
+\end_layout
+
+\begin_layout Author
+bxf_hit@163.com
+\end_layout
+
+\begin_layout Abstract
+最近由于毕设的需求，对CCA模型进行了比较系统的考察，在这里总结成一篇文章供以后查看。
+\end_layout
+
+\begin_layout Standard
+下面开始正文。
+\end_layout
+
+\begin_layout Section
+CCA原理分析
+\end_layout
+
+\begin_layout Standard
+典型关联分析(CCA)是利用综合变量对之间的相关关系来反映两个多维随机变量之间的整体相关性的多元统计分析方法。
+\end_layout
+
+\begin_layout Standard
+举个简单的例子,我们想考察一 个人解题能力 X(解题速度x1, 解题正确率x2)与他/她的阅读能力 Y(阅读速 度y1,理解程度y2)之间的关系;正常的思路自然
+是利用pearson相关系数，然而这里X,Y是多维随机变量，相关系数衡量的是两个单独的随机变量的相关程度，因此无法直接衡量，让我们看看CCA是怎么做的。
+\end_layout
+
+\begin_layout Standard
+CCA 的做法就是对于多维随机变量
+\begin_inset Formula $X=(X_{1}X_{2}....X_{m}),Y=(Y_{1}Y_{2}....Y_{n})$
+\end_inset
+
+寻找两个投影向量 a,b,分别与 X,Y相乘得到
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+X'=a^{T}X,Y'=b^{T}Y
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+然后使用 X’与 Y’的 Pearson 相关系数 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+{\textstyle {\displaystyle \rho(X',Y')=\frac{cov(X',Y')}{\sqrt{Var(X')}\sqrt{Var(Y')}}}}=\frac{E[(X'-\mu_{x})(Y'-\mu_{y})]}{\sqrt{Var(X')}\sqrt{Var(Y')}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+来度量 X 和 Y 的关系,我们期望寻求一组最优的解a和b使得相关系数
+\begin_inset Formula $\rho(X',Y')$
+\end_inset
+
+最大,这里的
+\begin_inset Formula $\mu_{x},\mu_{y}$
+\end_inset
+
+分别是X‘和Y'的均值。
+\end_layout
+
+\begin_layout Standard
+随机变量 
+\begin_inset Formula $X'=a^{T}X\text{和}Y'=b^{T}Y$
+\end_inset
+
+是第一对典型变量。然后寻求一个依然最大化相关但与第一对典型变量不相关的向量；这样就得到了第二对典型变量,这个步骤会进行min{m,n}次，m,n分别是X,Y的维
+度。
+\end_layout
+
+\begin_layout Standard
+因此CCA的主要工作就是求a和b两个投影向量，求得了a,b,也就求得了典型变量。
+\end_layout
+
+\begin_layout Section
+CCA求解过程
+\end_layout
+
+\begin_layout Standard
+给定两组向量 X 和 Y,X 维度为m, Y 维度为n,默认 m <= n。形式化表示如下：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+T=\left[\begin{array}{c}
+X\\
+Y
+\end{array}\right],E(T)=\left[\begin{array}{c}
+\mu_{x}\\
+\mu_{y}
+\end{array}\right],\Sigma=\left[\begin{array}{cc}
+\Sigma_{11} & \Sigma_{12}\\
+\Sigma_{21} & \Sigma_{22}
+\end{array}\right]
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其中
+\begin_inset Formula $\Sigma$
+\end_inset
+
+是T的协方差矩阵，
+\begin_inset Formula $\Sigma_{11}$
+\end_inset
+
+是X
+\size small
+自己的协方差矩阵，也就是X的方差矩阵,
+\size default
+
+\begin_inset Formula $\Sigma_{22}$
+\end_inset
+
+
+\size small
+是Y的方差矩阵
+\size default
+，
+\begin_inset Formula $\Sigma_{12}$
+\end_inset
+
+
+\size small
+是X与Y的协方差矩阵，
+\size default
+
+\begin_inset Formula $\Sigma_{21}$
+\end_inset
+
+是
+\begin_inset Formula $\Sigma_{12}$
+\end_inset
+
+的转置。
+\end_layout
+
+\begin_layout Standard
+由公式（1）和（3）可以得到：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+Var(X')=a^{T}\Sigma_{11}a,Var(Y')=b^{T}\Sigma_{22}b,Cov(X',Y')=a^{T}\Sigma_{12}b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+简要推导一个：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var(X')=Var(a^{T}X)=\frac{1}{N}\sum(a^{T}X_{i}-a^{T}\mu_{x})^{2}=a^{T}\frac{1}{N}\sum(X_{i}-\mu_{x})^{2}a=a^{T}\Sigma_{11}a
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+由公式（2）（4）可得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\rho(X',Y')=\frac{cov(X',Y')}{\sqrt{Var(X')}\sqrt{Var(Y')}}=\frac{a^{T}\Sigma_{12}b}{\sqrt{a^{T}\Sigma_{11}a}\sqrt{b^{T}\Sigma_{22}b}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+CCA的目的就是最大化相关系数
+\begin_inset Formula $\rho$
+\end_inset
+
+，容易观察到上面的分式中a = ka,b = mb时结果不变，所以此问题可以演变成下面的有条件约束的最优化问题：
+\end_layout
+
+\begin_layout Standard
+Maximize: 
+\begin_inset Formula $a^{T}\Sigma_{12}b$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subject to: 
+\begin_inset Formula $a^{T}\Sigma_{11}a=1,b^{T}\Sigma_{22}b=1$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+构造 Lagrangian 等式:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+L=a^{T}\Sigma_{12}b-\frac{\lambda}{2}(a^{T}\Sigma_{11}a-1)-\frac{\theta}{2}(b^{T}\Sigma_{22}b-1)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+求偏导，令导数得0：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Sigma_{12}b-\lambda\Sigma_{11}a=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Sigma_{21}a-\theta\Sigma_{22}b=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+令（7）左乘
+\begin_inset Formula $a^{T}$
+\end_inset
+
+,(8)左乘
+\begin_inset Formula $b^{T}$
+\end_inset
+
+,再有
+\begin_inset Formula $a^{T}\Sigma_{11}a=1,b^{T}\Sigma_{22}b=1$
+\end_inset
+
+得
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\text{𝜆}=\text{𝜃}=a^{T}\Sigma_{12}b
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+也就是说
+\begin_inset Formula $\lambda$
+\end_inset
+
+就是corr(X',Y')，只要求出最大的
+\begin_inset Formula $\lambda$
+\end_inset
+
+即可。
+\end_layout
+
+\begin_layout Standard
+由公式（8）导出b，再带入（7）中，结合（9）
+\begin_inset Formula $\text{𝜆}=\text{𝜃}$
+\end_inset
+
+可得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}a=\text{𝜆}^{2}a
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+这样只要求出矩阵
+\begin_inset Formula $\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}$
+\end_inset
+
+的最大的特征值和对应的特征向量就能求得
+\begin_inset Formula $\lambda\text{和a了}$
+\end_inset
+
+，b也可以求得。
+\end_layout
+
+\begin_layout Standard
+至此我们终于完成了第一对典型变量对应的投影变量的求解。
+\end_layout
+
+\begin_layout Standard
+下面我们进行第2对和之后的投影变量的求解：
+\end_layout
+
+\begin_layout Standard
+与之前给出的约束条件有所不同的是，第二对投影变量还要保证：
+\begin_inset Formula 
+\begin{equation}
+a_{2}^{T}\Sigma_{11}a_{1}=0,b_{2}^{T}\Sigma_{22}b_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+也就是cov(
+\begin_inset Formula $a_{1}^{T}X$
+\end_inset
+
+,
+\begin_inset Formula $a_{2}^{T}X$
+\end_inset
+
+)=0,cov(
+\begin_inset Formula $b_{1}^{T}Y$
+\end_inset
+
+,
+\begin_inset Formula $b_{2}^{T}Y$
+\end_inset
+
+)=0,即第二对典型变量与第一对是线性无关的。
+\end_layout
+
+\begin_layout Standard
+由此，已知前k-1个投影向量，第k个投影向量可以表示为如下优化问题：
+\end_layout
+
+\begin_layout Standard
+Maximize: 
+\begin_inset Formula $a_{k}^{T}\Sigma_{12}b_{k}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subject to: 
+\begin_inset Formula $a_{k}^{T}\Sigma_{11}a_{k}=1,b_{k}^{T}\Sigma_{22}b_{k}=1$
+\end_inset
+
+;
+\begin_inset Formula $a_{k}^{T}\Sigma_{11}a_{i}=0,b_{k}^{T}\Sigma_{22}b_{i}=0$
+\end_inset
+
+ (i=0,1,2
+\begin_inset Formula $\cdots k-1$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+我们先来求解第二组投影向量
+\begin_inset Formula $a_{2},b_{2}$
+\end_inset
+
+,构造 Lagrangian 等式:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+L=a_{2}^{T}\Sigma_{12}b_{2}-\frac{\lambda}{2}(a_{2}^{T}\Sigma_{11}a_{2}-1)-\frac{\theta}{2}(b_{2}^{T}\Sigma_{22}b_{2}-1)+\gamma(a_{2}^{T}\Sigma_{11}a_{1})+\beta(b_{2}^{T}\Sigma_{22}b_{1})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+求偏导，令偏导为0得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial L}{\partial a_{2}}=\Sigma_{12}b_{2}-\lambda\Sigma_{11}a_{2}+\gamma\Sigma_{11}a_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial L}{\partial b_{2}}=\Sigma_{21}a_{2}-\theta\Sigma_{22}b_{2}+\beta\Sigma_{22}b_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial L}{\partial a_{1}}=\gamma\Sigma_{11}a_{2}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial L}{\partial b_{1}}=\beta\Sigma_{22}b_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $a_{2}^{T}$
+\end_inset
+
+左乘(13)，
+\begin_inset Formula $b_{2}^{T}$
+\end_inset
+
+左乘(14)，得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+a_{2}^{T}\Sigma_{12}b_{2}-\lambda a_{2}^{T}\Sigma_{11}a_{2}+\gamma a_{2}^{T}\Sigma_{11}a_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+b_{2}^{T}\Sigma_{21}a_{2}-\theta b_{2}^{T}\Sigma_{22}b_{2}+\beta b_{2}^{T}\Sigma_{22}b_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $a_{2}^{T}$
+\end_inset
+
+左乘(15)，
+\begin_inset Formula $b_{2}^{T}$
+\end_inset
+
+左乘(16)，得:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\gamma a_{2}^{T}\Sigma_{11}a_{2}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\beta b_{2}^{T}\Sigma_{22}b_{1}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+将公式（19）（20）带入（17）（18）中，得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+a_{2}^{T}\Sigma_{12}b_{2}-\lambda a_{2}^{T}\Sigma_{11}a_{2}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+b_{2}^{T}\Sigma_{21}a_{2}-\theta b_{2}^{T}\Sigma_{22}b_{2}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+两边消去
+\begin_inset Formula $a_{2}^{T}$
+\end_inset
+
+，
+\begin_inset Formula $b_{2}^{T}$
+\end_inset
+
+后，得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Sigma_{12}b_{2}-\lambda\Sigma_{11}a_{2}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Sigma_{21}a_{2}-\theta\Sigma_{22}b_{2}=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+不难发现公式（23）（24）与公式（7）（8）拥有相同的形式，由此同上可推得：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}a_{2}=\text{𝜆}^{2}a_{2}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+因此可以得知，a
+\begin_inset Formula $_{2}$
+\end_inset
+
+也是矩阵
+\begin_inset Formula $\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}$
+\end_inset
+
+的一个特征向量，由于
+\begin_inset Formula $a_{k}^{T}\Sigma_{11}a_{i}=0$
+\end_inset
+
+的限制，
+\begin_inset Formula $a_{2}\text{和a}_{1}$
+\end_inset
+
+显然不可能相同，因此
+\begin_inset Formula $a_{2}$
+\end_inset
+
+就是第二大特征值对应的特征向量，以此类推，可以得知共有
+\begin_inset Formula $t=rank(\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21})$
+\end_inset
+
+组特征向量，也就是t组投影向量，对应特征值
+\begin_inset Formula $\text{𝜆}_{i}^{2}$
+\end_inset
+
+(i=1,2,3
+\begin_inset Formula $\cdots t$
+\end_inset
+
+),
+\begin_inset Formula $a_{i},b_{i}$
+\end_inset
+
+也就是第i大相关系数对应的投影向量。CCA的一个比较神奇的性质就是矩阵
+\begin_inset Formula $\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}a_{2}$
+\end_inset
+
+的t组特征向量刚好就是要求的投影变量，而且投影后的不同组的典型变量是线性无关的！不得不让人感叹，数学真是个充满艺术的地方：）。
+\end_layout
+
+\begin_layout Standard
+至此，CCA的求解过程正式结束。
+\end_layout
+
+\begin_layout Section
+CCA的matlab代码实现
+\end_layout
+
+\begin_layout Standard
+了解了CCA的原理和求解过程后，CCA的实现其实就很简单了，只要求出矩阵
+\begin_inset Formula $\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}$
+\end_inset
+
+的特征值就行了，最后对求出的特征向量就是我们要找的投影向量。下面放上CCA的一个官方实现：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/muyeby/GraduationProject/tree/master/matlab_code/CCA
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+里面基本的函数已经加了注释，实现也很简洁，可以直接调用。
+\end_layout
+
+\begin_layout Section
+小结
+\end_layout
+
+\begin_layout Standard
+CCA通过降维让本身难以衡量相关性的两组多维随机变量降到1维，再利用Pearson系数去衡量两组变量的相关性是一个很有创意的想法，提出后也得到了很多应用；当然C
+CA本身也存在局限性，由于Pearson系数也叫线性相关系数，因此对于非线性相关的元素是无法捕捉的，因此后人又提出了KCCA等解决方案，下一回会系统介绍下KCC
+A.
+\end_layout
+
+\begin_layout Section
+参考文献
+\end_layout
+
+\begin_layout Enumerate
+Canonical correlation analysis: An overview with application to learning
+ methods.
+ David R.
+ Hardoon , Sandor Szedmak and John Shawe-Taylor
+\end_layout
+
+\begin_layout Enumerate
+http://www.cnblogs.com/boostable/p/lec_canonical_correlation_analysis.html
+\end_layout
+
+\begin_layout Enumerate
+http://www.cnblogs.com/jerrylead/archive/2011/06/20/2085491.html
+\end_layout
+
+\begin_layout Enumerate
+http://www.stat.cmu.edu/~ryantibs/datamining/lectures/10-cor1.pdf
+\end_layout
+
+\begin_layout Enumerate
+Improving Vector Space Word Representations Using Multilingual Correlation.
+ Manaal Faruqui and Chris Dyer
+\end_layout
+
+\end_body
+\end_document
