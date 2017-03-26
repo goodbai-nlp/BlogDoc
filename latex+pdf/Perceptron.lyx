@@ -307,7 +307,7 @@ w(t+1)=w(t)+η\sum_{n\in M}\varphi(x_{n})t_{n}
 \begin_inset Formula $φ(x_{i})$
 \end_inset
 
-加到当前对于权向量w的估计值上,而对于类 别C2,我们从w中减掉向量
+加到当前对于权向量w的估计值上,而对于类别C2,我们从w中减掉向量
 \begin_inset Formula $φ(x_{i})$
 \end_inset
 
@@ -342,6 +342,136 @@ w(t+1)=w(t)+η\sum_{n\in M}\varphi(x_{n})t_{n}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+感知器算法的对偶形式
+\end_layout
+
+\begin_layout Standard
+我们假设样本点
+\begin_inset Formula $(x_{i},y_{i})$
+\end_inset
+
+在更新过程中被使用了
+\begin_inset Formula $n_{i}$
+\end_inset
+
+次，因此，从原始形式的学习过程中可以得到，最后学习到的w和b(这里采用
+\begin_inset Formula $w^{T}x+b$
+\end_inset
+
+模式)可以分别表示为：
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+w=\sum_{i=1}^{N}n_{i}\eta y_{i}x_{i}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+b=\sum_{i=1}^{N}n_{i}\eta y_{i}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+考虑
+\begin_inset Formula $n_{i}$
+\end_inset
+
+的含义：若
+\begin_inset Formula $n_{i}$
+\end_inset
+
+的值越大，那么意味着这个样本点经常被误分。什么样的样本点容易被误分呢？很明显就是离超平面很近的点，超平面稍微一改动，这些点就会由正变成负，这些点就有可能是支持向
+量。
+\end_layout
+
+\begin_layout Standard
+将（8）（9）带入原始的感知机模型中，可得：
+\begin_inset Formula 
+\begin{equation}
+f(x)=sign(w\cdot x+b)=sign(\sum_{i=1}^{N}n_{i}\eta y_{i}x_{i}\cdot x+\sum_{i=1}^{N}n_{i}\eta y_{i})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+显然此时的学习目标就不是w,b,而变成了
+\begin_inset Formula $n_{i}$
+\end_inset
+
+,i=1,2
+\begin_inset Formula $\cdots$
+\end_inset
+
+N
+\end_layout
+
+\begin_layout Itemize
+训练过程也就可以表示为：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+初始化
+\begin_inset Formula $n_{i}$
+\end_inset
+
+=0
+\end_layout
+
+\begin_layout Enumerate
+训练集中选取数据
+\begin_inset Formula $(x_{i},y_{i})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+如果
+\begin_inset Formula $y_{i}(\sum_{i=1}^{N}n_{i}\eta y_{i}x_{i}\cdot x+\sum_{i=1}^{N}n_{i}\eta y_{i})\leq0$
+\end_inset
+
+,更新
+\begin_inset Formula $n_{i}\leftarrow n_{i}+1$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+转至2直至没有误分类数据
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+可以看出，其实对偶形式和原始形式本质上没有较大区别，那么对偶形式的意义在哪里呢？从式（10）可以看出，样本点的特征向量以内积的形式存在于感知器对偶形式的训练算法
+中，因此如果事先计算好所有的内积，也就是Gram矩阵，就可以较大的提高计算速度。
+\end_layout
+
+\begin_layout Standard
+对偶形式在求出
+\begin_inset Formula $n_{i}$
+\end_inset
+
+后，再利用公式（8）（9）即可求得w,b。
 \end_layout
 
 \begin_layout Section
@@ -385,6 +515,10 @@ Pattern Recognition And Machine Learning,chapter 4
 
 \begin_layout Enumerate
 http://blog.csdn.net/xiaowei_cqu/article/details/9004101
+\end_layout
+
+\begin_layout Enumerate
+https://www.zhihu.com/question/26526858
 \end_layout
 
 \begin_layout Enumerate
