@@ -270,7 +270,10 @@ $\lambda_k = log(Y_i=y_i|Y_{i-1}=y_{i-1})$
  > Chen等人2015年：　GRU/LSTM　＋ bigram
  ![enter image description here](http://wx1.sinaimg.cn/large/006Fmjmcly1fiescvij5gj309d05c74w.jpg)
  
-
+ - Word-based Methods
+ Cai 2016: 跳出了序列标注的框框，直接对分词结果建模。
+ ![enter image description here](http://wx2.sinaimg.cn/large/006Fmjmcly1fiesd0mfzpj30jk07ugnd.jpg)
+ 重新跑了Chen的实验, 并去掉了Chen的习语词典.
  - Multi-Criteria Joint Learning--- 引入GAN  + bigram
  ![enter image description here](http://wx3.sinaimg.cn/large/006Fmjmcly1fiesdqe0dtj30js0j0dno.jpg)
 
