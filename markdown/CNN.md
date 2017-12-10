@@ -293,3 +293,44 @@ applications.</p>
 <p><img src="https://lh3.googleusercontent.com/-NsqxmGLDxRo/WivqzH18xTI/AAAAAAAAAIQ/i1NSOeWdOCky9UcVj9IMMBo7mXvV2zsowCLcBGAs/s0/y.png" alt="enter image description here" title="y.png"></p>
 
 <p><img src="https://lh3.googleusercontent.com/-bA24w3VUuZc/WivrI0rqKLI/AAAAAAAAAIY/59Xd9-yWMUEHINaf3SblbAsesjzwRd5qgCLcBGAs/s0/z.png" alt="enter image description here" title="z.png"></p>
+
+
+
+<h3 id="4-cnn-in-pytorch">4. CNN in Pytorch</h3>
+
+
+
+<h4 id="a-pytorch-相关接口">a) Pytorch 相关接口</h4>
+
+<p>torch.nn.Conv2d： <br>
+<img src="https://lh3.googleusercontent.com/-NlH7_HP0w_U/Wi0L5wRdbVI/AAAAAAAAAJI/Q3WMTiiNpD4yT_62FfYtytCs6znDBdthwCLcBGAs/s0/zz.png" alt="enter image description here" title="zz.png"></p>
+
+<p>torch.nn.functional.max_pool2d： <br>
+<img src="https://lh3.googleusercontent.com/-b0O13ZAJhyk/Wi0PM31K32I/AAAAAAAAAJY/SIZS0X5h2I81J53JDyLIyIrNa9skZhUUACLcBGAs/s0/z1.png" alt="enter image description here" title="z1.png"></p>
+
+
+
+<h4 id="b-lenet-in-pytorch">b) LeNet in PyTorch.</h4>
+
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class LeNet(nn.Module):
+    def __init__(self):
+        super(LeNet, self).__init__()
+        self.conv1 = nn.Conv2d(1, 6, 5)   #in_channels:1, out_channels:6, kernel_size:5   
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1   = nn.Linear(16*5*5, 120)
+        self.fc2   = nn.Linear(120, 84)
+        self.fc3   = nn.Linear(84, 10)
+
+    def forward(self, x):
+        out = F.relu(self.conv1(x))
+        out = F.max_pool2d(out, 2)
+        out = F.relu(self.conv2(out))
+        out = out.view(out.size(0), -1)
+        out = F.relu(self.fc1(out))
+        out = F.relu(self.fc2(out))
+        out = F.softmax(self.fc3(out))
+        return out
+</code></pre>
