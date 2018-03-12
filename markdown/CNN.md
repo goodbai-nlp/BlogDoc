@@ -3,7 +3,7 @@
 <blockquote>
   <p>白雪峰 — xfbai@mtlab.hit.edu.cn.</p>
 </blockquote>
-
+<!-- more -->
 
 
 <h2 id="outline">Outline</h2>
